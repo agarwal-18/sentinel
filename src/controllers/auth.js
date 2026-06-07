@@ -2,9 +2,13 @@ const pool = require('../db/index')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+// Return user record using email 
+
 async function findUserByEmail(email) {
     return await pool.query('SELECT id, email, password_hash FROM users WHERE email = $1', [email]);
 }
+
+// User Registration
 
 async function register(req, res) {
     try {
@@ -24,6 +28,7 @@ async function register(req, res) {
     }
 };
 
+// User Login
 
 async function login(req, res) {
     try {
