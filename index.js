@@ -3,23 +3,16 @@ require('dotenv').config();
 const pool = require('./src/db/index');
 const auth = require('./src/routes/auth');
 const monitor = require('./src/routes/monitors');
+require('./src/jobs/pingMonitors');
+
 
 const app = express();
 app.use(express.json());
 
-/* app.get('/health', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT NOW()');
-        res.json({ connected: true, time: result.rows[0].now });
-    }
-    catch (err) {
-        res.status(500).json({connected: false, error: err.message});
-        console.log(err);
-    }
-}) */
 
 app.use('/auth', auth);
 app.use('/monitors', monitor);
+
 
 
 app.listen(process.env.PORT, () => {
