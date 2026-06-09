@@ -12,7 +12,7 @@ async function findUserByEmail(email) {
 
 async function register(req, res) {
     try {
-        const { name, email, password } = req.body;
+        const { name, username, email, password } = req.body;
         const userRecord = await findUserByEmail(email);
 
         if (userRecord.rowCount > 0) {
@@ -20,7 +20,7 @@ async function register(req, res) {
         }
             
         const hashedPassword = await bcrypt.hash(password, 10);
-        await pool.query('INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3)', [name, email, hashedPassword]); 
+        await pool.query('INSERT INTO users (name, username, email, password_hash) VALUES ($1, $2, $3, $4)', [name, username, email, hashedPassword]); 
         return res.status(201).json({message: 'User Registered Successfully.'});
     }
     catch (err) {

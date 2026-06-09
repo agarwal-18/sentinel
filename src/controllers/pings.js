@@ -13,7 +13,7 @@ async function verifyMonitor(monitorId, userId) {
 async function getPings(req, res) {
     try {
         const monitor = await verifyMonitor(req.params.id, req.user.userId);
-        if (monitor === 0) return res.status(404).json({ error: 'Monitor not found' });
+        if (monitor === 0) return res.status(404).json({ error: 'Monitor not found.' });
         
         const pingRecord = await pool.query(`
             SELECT * FROM pings WHERE monitor_id = $1`,
