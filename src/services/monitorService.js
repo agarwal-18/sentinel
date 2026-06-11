@@ -30,4 +30,17 @@ async function verifyMonitor(userId, monitorId) {
     return result;
 }
 
-module.exports = { calculateMonitorStats, verifyMonitor };
+async function failedPings(monitorId) {
+    const result = await pool.query(`
+        SELECT checked_at, status_code, error_log
+        FROM pings
+        WHERE monitor_id = $1 
+        AND is_up = false
+        AND checked_at >= NOW() - INTERVAL '24 hours'
+        ORDER BY checked_at DESC
+        `, [monitorId]
+    );
+    return result;
+}
+
+module.exports = { calculateMonitorStats, verifyMonitor, failedPings };
