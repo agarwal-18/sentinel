@@ -1,4 +1,5 @@
 const pool = require('../db/index');
+const { calculateMonitorStats } = require('../services/monitorService');
 
 async function verifyMonitor(monitorId, userId) {
     
@@ -16,8 +17,9 @@ async function getPings(req, res) {
         if (monitor === 0) return res.status(404).json({ error: 'Monitor not found.' });
         
         const pingRecord = await pool.query(`
-            SELECT * FROM pings WHERE monitor_id = $1`,
-            [req.params.id]
+            SELECT * FROM pings
+            WHERE monitor_id = $1
+            `, [req.params.id]
         );
 
         if (pingRecord.rowCount === 0) return res.status(200).json({pings: []});
@@ -33,26 +35,12 @@ async function getUptime(req, res) {
         const monitor = await verifyMonitor(req.params.id, req.user.userId);
         if (monitor === 0) return res.status(404).json({ error: 'Monitor not found.' });
         
-        const result = await pool.query(`
-            SELECT 
-            COUNT(*) AS total,
-            COUNT(*) FILTER (WHERE is_up = true) AS up_count 
-            FROM pings
-            WHERE monitor_id = $1 
-            AND checked_at >= NOW() - INTERVAL '90 days'`,
-            [req.params.id]
-        );
-
-        const { total, up_count } = result.rows[0];
-
-        if (parseInt(total) === 0) return res.status(200).json({uptime: null});
-
-        const uptimePercent = ( parseInt(up_count) / parseInt(total) ) * 100;
-        return res.status(200).json({uptime: uptimePercent.toFixed(2)});
+        const result =  await calculateMonitorStats(req.params.id);
+        return res.status(200).json({ uptime: result });
     }
 
     catch (err) {
-        return res.status(500).json({error: err.message});
+        return res.status(500).json({ error: err.message });
     }
 }
 

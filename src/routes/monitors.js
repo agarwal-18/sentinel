@@ -10,13 +10,15 @@ const {
     getMonitors,
     getMonitorById,
     createMonitor,
-    deleteMonitor
+    deleteMonitor,
+    toggle
 } = require('../controllers/monitors');
 
 const {
     getPings,
     getUptime
 } = require('../controllers/pings');
+
 
 router.get('/', validateToken, getMonitors);
 router.get('/:id', validateToken, getMonitorById);
@@ -25,5 +27,7 @@ router.delete('/:id', validateToken, deleteMonitor);
 
 router.get('/:id/pings', validateToken, getPings);
 router.get('/:id/uptime', validateToken, getUptime);
+
+router.patch('/:id/toggle', validateToken, toggle);
 
 module.exports = router;
