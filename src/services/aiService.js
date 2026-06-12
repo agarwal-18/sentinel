@@ -38,16 +38,11 @@ async function analyseIncident(monitorTitle, pings) {
         })
 
         const text = response.text; 
-        console.dir(response, {depth: null});
 
         return JSON.parse(text);
     } 
     catch (err) {
-        console.log(err);
-        return {error: err.message};
-        // if (err.message.includes('503') || err.message.includes('UNAVAILABLE')) {
-        //     return { error: 'AI analysis unavailable at the moment. Please try again.' };
-        // }
+        throw new Error('Failed to analyse incidents.');
     }
 }
 
