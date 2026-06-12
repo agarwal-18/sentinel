@@ -38,6 +38,7 @@ async function failedPings(monitorId) {
         AND is_up = false
         AND checked_at >= NOW() - INTERVAL '24 hours'
         ORDER BY checked_at DESC
+        LIMIT 50
         `, [monitorId]
     );
     return result;
