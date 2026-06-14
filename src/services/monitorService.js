@@ -22,7 +22,7 @@ async function calculateMonitorStats(monitorId) {
 
 async function verifyMonitor(userId, monitorId) {
     const result = await pool.query(`
-        SELECT * FROM monitors 
+        SELECT id, title, url, is_active, created_at FROM monitors 
         WHERE monitors.user_id = $1 
         AND monitors.id = $2
         `, [userId, monitorId]
