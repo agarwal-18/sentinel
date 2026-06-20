@@ -2,7 +2,20 @@ import { login, register } from '../services/authService'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+
 function Auth() {
+    const [error, setError] = useState('')
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({
         name: '',
@@ -13,7 +26,9 @@ function Auth() {
     const navigate = useNavigate();
 
     const handleSubmit = async () => {
+        
         try {
+            setError('');
             if (isLogin) {
                 const data = await login(formData.email, formData.password);
                 localStorage.setItem('token', data.token);
@@ -25,55 +40,219 @@ function Auth() {
             navigate('/dashboard');
         }
         catch (err) {
-            console.log(err)
+            const response = err.response?.data;
+            if (response?.errors) {
+                setError(response.errors[0].msg)
+            }
+            else if (response?.error) {
+                setError(response.error)
+            }
+            else {
+                setError('Something went wrong!')
+            }
         }
     }
 
 
+    // return (
+    //     <div> 
+    //         <h1>{isLogin ? 'Login' : 'Register' }</h1>
+
+    //         {!isLogin &&
+    //             <>
+    //                 <input
+    //                     type='text'
+    //                     placeholder='Name'
+    //                     value={formData.name}
+    //                     onChange={(e) => setFormData({...formData, name: e.target.value})}
+    //                 />
+
+    //                 <input
+    //                     type='text'
+    //                     placeholder='Username'
+    //                     value={formData.username}
+    //                     onChange={(e) => setFormData({...formData, username: e.target.value})}
+    //                 />
+    //             </>
+    //         }
+
+    //         <input
+    //             type='email'
+    //             placeholder='Email'
+    //             value={formData.email}
+    //             onChange={(e) => setFormData({...formData, email: e.target.value})}
+    //         />
+
+    //         <input
+    //             type='password'
+    //             placeholder='Password'
+    //             value={formData.password}
+    //             onChange={(e) => setFormData({...formData, password: e.target.value})}
+    //         />  
+
+    //         <button onClick={handleSubmit}>
+    //             {isLogin ? 'Login' : 'Register'}
+    //         </button>
+
+    //         <p onClick={() => setIsLogin(!isLogin)}> 
+    //             {isLogin ? 'Not registered? Register' : 'Already have an account? Login'}
+    //         </p>
+    //     </div>
+    // )
+
+
     return (
-        <div> 
-            <h1>{isLogin ? 'Login' : 'Register' }</h1>
+    <div className="flex min-h-screen items-center justify-center px-4">
 
-            {!isLogin &&
-                <>
-                    <input
-                        type='text'
-                        placeholder='Name'
-                        value={formData.name}
-                        onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    />
+        <div className="w-full max-w-md">
 
-                    <input
-                        type='text'
-                        placeholder='Username'
-                        value={formData.username}
-                        onChange={(e) => setFormData({...formData, username: e.target.value})}
-                    />
-                </>
-            }
+        {/* Branding */}
+        <div className="mb-8 text-center">
 
-            <input
-                type='email'
-                placeholder='Email'
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-            />
-
-            <input
-                type='password'
-                placeholder='Password'
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-            />  
-
-            <button onClick={handleSubmit}>
-                {isLogin ? 'Login' : 'Register'}
+            <button
+            onClick={() => navigate("/")}
+            className="
+                text-4xl
+                font-bold
+                tracking-tight
+                text-white
+                transition-colors
+                hover:text-zinc-300
+            "
+            >
+            ⬡ Sentinel
             </button>
 
-            <p onClick={() => setIsLogin(!isLogin)}> 
-                {isLogin ? 'Not registered? Register' : 'Already have an account? Login'}
+            <p className="mt-3 text-muted-foreground">
+            Monitor your services with confidence.
             </p>
+
         </div>
-    )
+
+        <Card>
+
+            <CardHeader>
+
+            <CardTitle>
+                {isLogin ? "Welcome Back" : "Create Account"}
+            </CardTitle>
+
+            <CardDescription>
+                {isLogin
+                ? "Sign in to access your monitors."
+                : "Create an account to start monitoring services."}
+            </CardDescription>
+
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+
+            {!isLogin && (
+                <>
+                <div className="space-y-2">
+                    <Label>Name</Label>
+
+                    <Input
+                    value={formData.name}
+                    placeholder="John Doe"
+                    onChange={(e) =>
+                        setFormData({
+                        ...formData,
+                        name: e.target.value,
+                        })
+                    }
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label>Username</Label>
+
+                    <Input
+                    value={formData.username}
+                    placeholder="johndoe"
+                    onChange={(e) =>
+                        setFormData({
+                        ...formData,
+                        username: e.target.value,
+                        })
+                    }
+                    />
+                </div>
+                </>
+            )}
+
+            <div className="space-y-2">
+                <Label>Email</Label>
+
+                <Input
+                type="email"
+                placeholder="john@example.com"
+                value={formData.email}
+                onChange={(e) =>
+                    setFormData({
+                    ...formData,
+                    email: e.target.value,
+                    })
+                }
+                />
+            </div>
+
+            <div className="space-y-2">
+                <Label>Password</Label>
+
+                <Input
+                type="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) =>
+                    setFormData({
+                    ...formData,
+                    password: e.target.value,
+                    })
+                }
+                />
+            </div>
+            
+            {error && (
+                <p className="text-sm text-red-500"> {error} </p>
+            )}
+
+            <Button
+                className="
+                w-full
+                bg-white
+                text-black
+                hover:bg-zinc-200
+                hover:text-black
+                "
+                onClick={handleSubmit}
+            >
+                {isLogin ? "Login" : "Create Account"}
+            </Button>
+
+            <button
+                className="
+                w-full
+                text-sm
+                text-muted-foreground
+                hover:text-foreground
+                transition-colors
+                "
+                onClick={() => {setIsLogin(!isLogin), setError('')}}
+            >
+                {isLogin
+                ? "Don't have an account? Register"
+                : "Already have an account? Login"}
+            </button>
+
+            </CardContent>
+
+        </Card>
+
+        </div>
+
+    </div>
+    );
+
 }
 export default Auth
