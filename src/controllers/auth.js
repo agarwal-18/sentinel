@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 // Return user record using email 
 
 async function findUserByEmail(email) {
-    return await pool.query('SELECT id, email, password_hash FROM users WHERE email = $1', [email]);
+    return await pool.query('SELECT id, username, email, password_hash FROM users WHERE email = $1', [email]);
 }
 
 // User Registration
@@ -18,7 +18,9 @@ async function register(req, res) {
         if (userRecord.rowCount > 0) {
             return res.status(400).json({error: 'Email is already in use.'});
         }
-            
+        
+        
+
         const hashedPassword = await bcrypt.hash(password, 10);
         await pool.query('INSERT INTO users (name, username, email, password_hash) VALUES ($1, $2, $3, $4)', [name, username, email, hashedPassword]); 
         return res.status(201).json({message: 'User Registered Successfully.'});
@@ -45,7 +47,7 @@ async function login(req, res) {
 
         if (passwordMatch) {
             const token = jwt.sign(
-                { userId: userRecord.rows[0].id, email: email },
+                { userId: userRecord.rows[0].id, username: userRecord.rows[0].username, email: email },
                 process.env.JWT_SECRET,
                 { expiresIn: '7d'}
             );

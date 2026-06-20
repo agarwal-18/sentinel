@@ -10,7 +10,8 @@ function validateToken(req, res, next) {
         req.user = decodedToken;
         next();
     }
-    catch {
+    catch (err) {
+        console.log(err.message)
         res.status(401).json({error: 'Unauthorized user.'})
     }
 }

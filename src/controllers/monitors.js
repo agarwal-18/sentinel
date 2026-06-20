@@ -3,7 +3,11 @@ const { verifyMonitor } = require('../services/monitorService');
 
 async function getMonitors(req, res) {
     try {
-        const monitors = await verifyMonitor(req.user.userId, req.params.id);
+        const monitors = await pool.query(`
+            SELECT id, title, url, is_active, created_at 
+            FROM monitors
+            WHERE user_id = $1
+            `, [req.user.userId]);
 
         if (monitors.rowCount === 0) return res.status(200).json({ monitors: [] });
         return res.status(200).json({ monitors: monitors.rows });

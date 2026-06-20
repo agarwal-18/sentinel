@@ -6,7 +6,8 @@ const {
     registerValidation,
     loginValidation,
     monitorValidation,
-    checkValidation
+    checkValidation,
+    checkExistingUser
 } = require('../middleware/validation');
 
 const {
@@ -15,7 +16,7 @@ const {
 } = require('../controllers/auth');
 
 
-router.post('/register', registerValidation, checkValidation, register);
+router.post('/register', registerValidation, checkExistingUser, checkValidation, register);
 router.post('/login', loginValidation, checkValidation, login);
 
 module.exports = router;

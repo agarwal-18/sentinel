@@ -20,12 +20,13 @@ async function getUserMonitors(req, res) {
                 monitors.id,
                 monitors.title,
                 monitors.url,
+                monitors.is_active,
                 pings.is_up,
                 pings.latency,
                 pings.checked_at
             FROM monitors
             LEFT JOIN pings ON pings.monitor_id = monitors.id
-            WHERE monitors.user_id = $1 AND monitors.is_active = true
+            WHERE monitors.user_id = $1
             ORDER BY monitors.id, pings.checked_at DESC
             `, [userRecord.rows[0].id]
         );

@@ -1,4 +1,6 @@
 const { body, validationResult } = require("express-validator");
+const pool = require('../db/index');
+
 
 const registerValidation = [
     body('name').notEmpty().withMessage('Name cannot be empty.'),
@@ -20,6 +22,19 @@ const registerValidation = [
         })  
         .withMessage('Password must be at least 8 characters long and contain uppercase, lowercase, number, special character')
 ];
+
+const checkExistingUser = async (req, res, next) => {
+    try {
+        const { username } = req.body;
+        const result = await pool.query(`SELECT id FROM users WHERE username = $1`, [username]);
+        if (result.rowCount > 0) res.status(400).json({error: 'Username already in use.'});
+        next();
+    }
+    catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+    
+} 
 
 const loginValidation = [
     body('email')
@@ -46,4 +61,4 @@ function checkValidation(req, res, next) {
     next();
 }
 
-module.exports = { registerValidation, loginValidation, monitorValidation, checkValidation };
+module.exports = { registerValidation, checkExistingUser, loginValidation, monitorValidation, checkValidation };
