@@ -5,4 +5,13 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
+pool.connect((err, client, release) => {
+    if (err) {
+        console.error('DATABASE CONNECTION FAILED:', err.message)
+    } else {
+        console.log('DATABASE CONNECTED SUCCESSFULLY')
+        release()
+    }
+})
+
 module.exports = pool;
