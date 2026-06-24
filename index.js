@@ -34,8 +34,13 @@ app.use('/monitors', monitor);
 app.use('/status', statusPage);
 
 app.get('/health', async (req, res) => {
-    const result = await pool.query('SELECT NOW()')
-    return res.status(200).json({ connected: true, result: result.rows[0]})
+    try {
+        const result = await pool.query('SELECT NOW()')
+        return res.status(200).json({ connected: true, result: result.rows[0] })
+    }
+    catch (err) {
+        return res.status(500).json({ connected: false, error: err.message })
+    }
 })
 
 app.listen(process.env.PORT, () => {
