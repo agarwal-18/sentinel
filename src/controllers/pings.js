@@ -19,6 +19,7 @@ async function getPings(req, res) {
         const pingRecord = await pool.query(`
             SELECT * FROM pings
             WHERE monitor_id = $1
+            ORDER BY checked_at DESC
             `, [req.params.id]
         );
 
