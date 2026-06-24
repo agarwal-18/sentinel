@@ -113,29 +113,25 @@ function Dashboard() {
         <div className="container mx-auto min-h-screen py-8">
 
             {/* Navbar */}
-            <div className="mb-8 flex items-center justify-between">
+            <div className="mb-8 grid grid-cols-3 items-center">
                 <button
                     onClick={() => navigate("/dashboard")}
-                    className="
-                        text-2xl
-                        font-bold
-                        tracking-tight
-                        transition-colors
-                        hover:text-zinc-300
-                        cursor-pointer">
+                    className="text-2xl font-bold tracking-tight transition-colors animate-in hover:text-zinc-300 cursor-pointer justify-self-start"
+                >
                     ⬡ Sentinel
                 </button>
-                
-                <div className="flex items-center gap-3">
-            
-                    <span className="text-lg text-zinc-200 items-end">Welcome, {username}</span>
-                    <Button 
-                        onClick={() => logout()}
-                        variant="ghost"
-                        className="cursor-pointer text-zinc-300">
-                        Logout
-                    </Button>
-                </div>
+
+                <h1 className="text-2xl font-bold tracking-tight justify-self-center">
+                    {username}'s Dashboard
+                </h1>
+
+                <Button
+                    onClick={() => logout()}
+                    variant="ghost"
+                    className="cursor-pointer text-zinc-300 justify-self-end"
+                >
+                    Logout
+                </Button>
             </div>
 
             {/* Header */}
@@ -170,7 +166,7 @@ function Dashboard() {
                 <div className="mb-8 grid gap-4 md:grid-cols-3">
 
                 <Card>
-                    <CardContent className="pt-6">
+                    <CardContent className="pt-3">
                     <p className="text-sm text-muted-foreground">
                         Total Monitors
                     </p>
@@ -182,7 +178,7 @@ function Dashboard() {
                 </Card>
 
                 <Card>
-                    <CardContent className="pt-6">
+                    <CardContent className="pt-3">
                     <p className="text-sm text-muted-foreground">
                         Active
                     </p>
@@ -194,7 +190,7 @@ function Dashboard() {
                 </Card>
 
                 <Card>
-                    <CardContent className="pt-6">
+                    <CardContent className="pt-3">
                     <p className="text-sm text-muted-foreground">
                         Paused
                     </p>

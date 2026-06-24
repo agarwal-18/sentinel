@@ -339,7 +339,6 @@ function MonitorDetails() {
                                     <XAxis dataKey="time" />
                                     <YAxis />
                                     <Tooltip />
-                                    {/* <Line type="monotone" dataKey="latency" stroke="#22c55e" connectNulls={false} /> */}
                                     <Line
                                         type="monotone"
                                         dataKey="latency"

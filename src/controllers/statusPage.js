@@ -17,6 +17,7 @@ async function getUserMonitors(req, res) {
 
         const latestPing = await pool.query(`
             SELECT DISTINCT ON (monitors.id)
+                monitors.user_id,
                 monitors.id,
                 monitors.title,
                 monitors.url,
