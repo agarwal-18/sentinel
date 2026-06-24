@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route  } from "react-router-dom";
 
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import MonitorDetails from "./pages/MonitorDetails"
 import StatusPage from "./pages/StatusPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useEffect } from "react";
@@ -20,6 +21,12 @@ function App() {
         <Route path="/dashboard" element={ 
           <ProtectedRoute> 
             <Dashboard />
+          </ProtectedRoute>}
+        />
+
+        <Route path="monitor/:id" element={
+          <ProtectedRoute>
+            <MonitorDetails />
           </ProtectedRoute>}
         />
 

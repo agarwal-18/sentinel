@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getMonitorStats, createMonitor, deleteMonitor as deleteMonitorService, toggleMonitor as toggleMonitorService } from "../services/monitorService";
+import { getMonitors, createMonitor, deleteMonitor as deleteMonitorService, toggleMonitor as toggleMonitorService } from "../services/monitorService";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns"
 import { jwtDecode } from "jwt-decode";
@@ -34,6 +34,7 @@ function Dashboard() {
         title: '',
         url: ''
     });
+    const [loading, setLoading] = useState(true);
     
     const navigate = useNavigate();
 
@@ -43,16 +44,23 @@ function Dashboard() {
     
     const fetchMonitors = async () => {
         try {
-            const data = await getMonitorStats(username);
+            const data = await getMonitors(username);
             setMonitors(data.monitors);
-        }
-        catch (err) {
+        }   catch (err) {
             console.log(err.message);
+        }   finally {
+            setLoading(false);
         }
     }
 
     useEffect(() => {   
-        fetchMonitors()
+        fetchMonitors();
+
+        const interval = setInterval(() => {
+            fetchMonitors();
+        }, 300000)
+
+        return () => clearInterval(interval);
     }, []);
 
     
@@ -106,23 +114,28 @@ function Dashboard() {
 
             {/* Navbar */}
             <div className="mb-8 flex items-center justify-between">
-            <button
-                onClick={() => navigate("/dashboard")}
-                className="
-                    text-2xl
-                    font-bold
-                    tracking-tight
-                    transition-colors
-                    hover:text-zinc-300">
-                ⬡ Sentinel
-            </button>
-        
-
-            <Button 
-                onClick={() => logout()}
-                variant="ghost">
-                Logout
-            </Button>
+                <button
+                    onClick={() => navigate("/dashboard")}
+                    className="
+                        text-2xl
+                        font-bold
+                        tracking-tight
+                        transition-colors
+                        hover:text-zinc-300
+                        cursor-pointer">
+                    ⬡ Sentinel
+                </button>
+                
+                <div className="flex items-center gap-3">
+            
+                    <span className="text-lg text-zinc-200 items-end">Welcome, {username}</span>
+                    <Button 
+                        onClick={() => logout()}
+                        variant="ghost"
+                        className="cursor-pointer text-zinc-300">
+                        Logout
+                    </Button>
+                </div>
             </div>
 
             {/* Header */}
@@ -146,7 +159,7 @@ function Dashboard() {
                     active:scale-95
                     transition-all
                     duration-150
-                    "
+                    cursor-pointer"
                     onClick={() => setIsPopup(true)}
                 >
                     + Add Monitor
@@ -186,7 +199,7 @@ function Dashboard() {
                         Paused
                     </p>
 
-                    <h2 className="mt-2 text-3xl font-bold text-yellow-500">
+                    <h2 className="mt-2 text-3xl font-bold text-blue-500">
                         {pausedMonitors}
                     </h2>
                     </CardContent>
@@ -194,174 +207,195 @@ function Dashboard() {
 
             </div>
 
-            {/* Empty State */}
-            {monitors.length === 0 && (
-            <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                    <p className="mb-4 text-muted-foreground">
-                        <h2 className="mb-2 text-lg font-semibold">
-                            No monitors yet
-                        </h2>
+            {loading 
+                ? (
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {[1,2,3].map(i => (
+                            <Card key={i} className="animate-pulse">
+                                <CardContent className="h-32" />
+                            </Card>
+                        ))}
+                    </div>
+                    ) 
+                : monitors.length === 0 
+                    ? (
+                        (
+                            <Card>
+                                <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                                    <div className="mb-4 text-center">
+                                        <h2 className="mb-2 text-lg font-semibold">
+                                            No monitors yet
+                                        </h2>
 
-                        <p className="mb-4 text-muted-foreground">
-                            Create your first monitor and start tracking uptime.
-                        </p>
-                    </p>
+                                        <p className="text-muted-foreground">
+                                            Create your first monitor and start tracking uptime.
+                                        </p>
+                                    </div>
 
-                    <Button onClick={() => setIsPopup(true)}>
-                        Create your first monitor
-                    </Button>
-                </CardContent>
-            </Card>
-            )}
-
-            {/* Monitor Grid */}
-            {monitors.length > 0 && (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {monitors.map((monitor) => {
-                    console.log(
-                        monitor.title,
-                        monitor.checked_at,
-                        new Date(monitor.checked_at),
-                        new Date().toString()
-                    );
-                return (    
-                <Card
-                    key={monitor.id}
-                    className="
-                        transition-all
-                        duration-200
-                        hover:-translate-y-1
-                        hover:border-zinc-700
-                        hover:shadow-lg">
-                    <CardHeader>
-                        <div className="flex items-start justify-between gap-3">
-
-                            <div className="flex min-w-0 items-center gap-2">
-
-                                <div
-                                    className={`h-2 w-2 rounded-full shrink-0 ${
-                                        monitor.is_active === false
-                                        ? "bg-blue-500"
-                                        : monitor.is_up === true
-                                        ? "bg-green-500"
-                                        : "bg-red-500"
-                                    }`}
-                                    />
-
-                                <CardTitle className="truncate">
-                                    {monitor.title}
-                                </CardTitle>
-
-                            </div>
-
-                            <Badge
-                                className={
-                                    monitor.is_active === false
-                                    ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
-                                    : monitor.is_up === true
-                                    ? "bg-green-500/10 text-green-500 border-green-500/20"
-                                    : "bg-red-500/10 text-red-500 border-red-500/20"
-                                }
-                                >
-                                {monitor.is_active === false
-                                    ? "Paused"
-                                    : monitor.is_up === true
-                                    ? "Up"
-                                    : "Down"}
-                            </Badge>
-
-                        </div>
-
-                        <CardDescription className="mt-2 truncate">
-                            {monitor.url}
-                        </CardDescription>
-                    </CardHeader>
-
-                    <CardContent>
-                        {/* Stats */}
-                        <div className="mb-4 grid grid-cols-2 gap-3">
-
-                            <div className="rounded-lg border p-3">
-                                <p className="text-xs text-muted-foreground">
-                                    Uptime
-                                </p>
-
-                                <p className="text-lg font-semibold">
-                                    {monitor.uptime}%
-                                </p>
-                            </div>
-
-                            <div className="rounded-lg border p-3">
-                                <p className="text-xs text-muted-foreground">
-                                    Latency
-                                </p>
-
-                                <p className="text-lg font-semibold">
-                                    {monitor.latency
-                                    ? `${monitor.latency} ms`
-                                    : "--"}
-                                </p>
-                            </div>
-
-                        </div>
-
-                        {/* Last Check */}
-                        <p className="mb-4 text-xs text-muted-foreground">
-                            {monitor.checked_at ? (
-                                <>
-                                    Last checked{" "}
-                                    {formatDistanceToNow(
-                                        new Date(monitor.checked_at),
-                                        { addSuffix: true }
-                                    )}
-                                </>
-                            ) : (
-                                ""
-                            )}
-                            </p>
-
-                        {/* Actions */}
-                        <div className="flex gap-2">
-
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                    navigate(`/monitor/${monitor.id}`)
-                                }
+                                    <Button 
+                                        className="cursor-pointer" 
+                                        onClick={() => setIsPopup(true)}
+                                    >
+                                        Create your first monitor
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        )
+                        ) 
+                    : (
+                        (
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {monitors.map((monitor) => (
+                            <Card
+                                key={monitor.id}
+                                className="
+                                    transition-all
+                                    duration-200
+                                    hover:-translate-y-1
+                                    hover:border-zinc-700
+                                    hover:shadow-lg
+                                    cursor-pointer"
+                                    
+                                onClick={() => {
+                                    navigate(`/monitor/${monitor.id}`,
+                                        { state: { monitor } }
+                                    )
+                                }}
+                                
                             >
-                                View
-                            </Button>
 
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => toggleMonitor(monitor.id)}
-                            >
-                                {monitor.is_active ? "Pause" : "Resume"}
-                            </Button>
+                                <CardHeader>
+                                    <div className="flex items-start justify-between gap-3">
 
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => deleteMonitor(monitor.id)}
-                            >
-                                Delete
-                            </Button>
+                                        <div className="flex min-w-0 items-center gap-2">
+
+                                            <div
+                                                className={`h-2 w-2 rounded-full shrink-0 ${
+                                                    monitor.is_active === false
+                                                    ? "bg-blue-500"
+                                                    : monitor.is_up === true
+                                                    ? "bg-green-500"
+                                                    : "bg-red-500"
+                                                }`}
+                                                />
+
+                                            <CardTitle className="truncate">
+                                                {monitor.title}
+                                            </CardTitle>
+
+                                        </div>
+
+                                        <Badge
+                                            className={
+                                                monitor.is_active === false
+                                                ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                                                : monitor.is_up === true
+                                                ? "bg-green-500/10 text-green-500 border-green-500/20"
+                                                : "bg-red-500/10 text-red-500 border-red-500/20"
+                                            }
+                                            >
+                                            {monitor.is_active === false
+                                                ? "Paused"
+                                                : monitor.is_up === true
+                                                ? "Up"
+                                                : "Down"}
+                                        </Badge>
+
+                                    </div>
+
+                                    <CardDescription className="mt-2 truncate">
+                                        {monitor.url}
+                                    </CardDescription>
+                                </CardHeader>
+
+                                <CardContent>
+                                    {/* Stats */}
+                                    <div className="mb-4 grid grid-cols-2 gap-3">
+
+                                        <div className="rounded-lg border p-3 cursor-default" onClick={(e) => e.stopPropagation()}>
+                                            <p className="text-xs text-muted-foreground">
+                                                Uptime
+                                            </p>
+
+                                            <p className="text-lg font-semibold">
+                                                {monitor.uptime}%
+                                            </p>
+                                        </div>
+
+                                        <div className="rounded-lg border p-3 cursor-default" onClick={(e) => e.stopPropagation()}>
+                                            <p className="text-xs text-muted-foreground">
+                                                Latency
+                                            </p>
+
+                                            <p className="text-lg font-semibold">
+                                                {monitor.latency
+                                                ? `${monitor.latency} ms`
+                                                : "--"}
+                                            </p>
+                                        </div>
+
+                                    </div>
+
+                                    {/* Last Check */}
+                                    <p className="mb-4 text-xs text-muted-foreground">
+                                        {monitor.checked_at ? (
+                                            <>
+                                                Last checked{" "}
+                                                {formatDistanceToNow(
+                                                    new Date(monitor.checked_at),
+                                                    { addSuffix: true }
+                                                )}
+                                            </>
+                                        ) : (
+                                            ""
+                                        )}
+                                        </p>
+
+                                    {/* Actions */}
+                                    <div className="flex gap-2">
+
+                                        <Button
+                                            variant="outline"
+                                            className="cursor-pointer"
+                                            size="sm"
+                                            onClick={() =>
+                                                navigate(`/monitor/${monitor.id}`, { state: { monitor } })
+                                            }
+                                        >
+                                            View
+                                        </Button>
+
+                                        <Button
+                                            variant="outline"
+                                            className="cursor-pointer"
+                                            size="sm"
+                                            onClick={(e) => {e.stopPropagation(), toggleMonitor(monitor.id)}}
+                                        >
+                                            {monitor.is_active ? "Pause" : "Resume"}
+                                        </Button>
+
+                                        <Button
+                                            variant="destructive"
+                                            className="cursor-pointer"
+                                            size="sm"
+                                            onClick={(e) => { e.stopPropagation(), deleteMonitor(monitor.id) }}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </div>
+
+                                </CardContent>
+
+                            </Card>
+                            ))}
                         </div>
-
-                    </CardContent>
-
-                </Card>
-                )})}
-            </div>
-            )}
-
+                        )
+                    )
+                }
             {/* Create Monitor Dialog */}
             <Dialog
-            open={isPopup}
-            onOpenChange={setIsPopup}
+                open={isPopup}
+                onOpenChange={setIsPopup}
             >
                 <DialogContent className="sm:max-w-125">
 
