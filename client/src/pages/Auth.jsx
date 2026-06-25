@@ -169,7 +169,7 @@ function Auth() {
 
                     <Input
                     value={formData.username}
-                    placeholder="johndoe"
+                    placeholder="Your Name"
                     onChange={(e) =>
                         setFormData({
                         ...formData,
@@ -186,7 +186,7 @@ function Auth() {
 
                 <Input
                 type="email"
-                placeholder="john@example.com"
+                placeholder="myemail@example.com"
                 value={formData.email}
                 onChange={(e) =>
                     setFormData({
