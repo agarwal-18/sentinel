@@ -53,54 +53,6 @@ function Auth() {
         }
     }
 
-
-    // return (
-    //     <div> 
-    //         <h1>{isLogin ? 'Login' : 'Register' }</h1>
-
-    //         {!isLogin &&
-    //             <>
-    //                 <input
-    //                     type='text'
-    //                     placeholder='Name'
-    //                     value={formData.name}
-    //                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-    //                 />
-
-    //                 <input
-    //                     type='text'
-    //                     placeholder='Username'
-    //                     value={formData.username}
-    //                     onChange={(e) => setFormData({...formData, username: e.target.value})}
-    //                 />
-    //             </>
-    //         }
-
-    //         <input
-    //             type='email'
-    //             placeholder='Email'
-    //             value={formData.email}
-    //             onChange={(e) => setFormData({...formData, email: e.target.value})}
-    //         />
-
-    //         <input
-    //             type='password'
-    //             placeholder='Password'
-    //             value={formData.password}
-    //             onChange={(e) => setFormData({...formData, password: e.target.value})}
-    //         />  
-
-    //         <button onClick={handleSubmit}>
-    //             {isLogin ? 'Login' : 'Register'}
-    //         </button>
-
-    //         <p onClick={() => setIsLogin(!isLogin)}> 
-    //             {isLogin ? 'Not registered? Register' : 'Already have an account? Login'}
-    //         </p>
-    //     </div>
-    // )
-
-
     return (
     <div className="flex min-h-screen items-center justify-center px-4">
 
@@ -154,7 +106,7 @@ function Auth() {
 
                     <Input
                     value={formData.name}
-                    placeholder="John Doe"
+                    placeholder="Your Name"
                     onChange={(e) =>
                         setFormData({
                         ...formData,
@@ -169,7 +121,7 @@ function Auth() {
 
                     <Input
                     value={formData.username}
-                    placeholder="Your Name"
+                    placeholder="myusername"
                     onChange={(e) =>
                         setFormData({
                         ...formData,

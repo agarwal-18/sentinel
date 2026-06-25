@@ -29,7 +29,8 @@ import {
     AlertTriangle,
     CircleCheck,
     RefreshCw,
-    Clock3
+    Clock3,
+    ArrowLeft
 } from "lucide-react";
 
 function MonitorDetails() {
@@ -169,6 +170,7 @@ function MonitorDetails() {
 
     return (
         <div className="container mx-auto max-w-7xl px-4 py-8 space-y-8">
+
             <Button
                 variant="ghost"
                 className="
@@ -186,8 +188,9 @@ function MonitorDetails() {
                     hover:text-white
                 "
                 onClick={() => navigate("/dashboard")}
-            >
-                ← Back to Dashboard
+            >   
+                <ArrowLeft className="h-4 w-4" />
+                Back to Dashboard
             </Button>
 
             {/* Header */}

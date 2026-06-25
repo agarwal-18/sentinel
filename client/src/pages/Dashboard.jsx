@@ -58,7 +58,7 @@ function Dashboard() {
 
         const interval = setInterval(() => {
             fetchMonitors();
-        }, 300000)
+        }, 10000)
 
         return () => clearInterval(interval);
     }, []);
@@ -241,149 +241,146 @@ function Dashboard() {
                     : (
                         (
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            {monitors.map((monitor) => (
-                            <Card
-                                key={monitor.id}
-                                className="
-                                    transition-all
-                                    duration-200
-                                    hover:-translate-y-1
-                                    hover:border-zinc-700
-                                    hover:shadow-lg
-                                    cursor-pointer"
+                            {monitors.map((monitor) => {
+                                const status = !monitor.is_active
+                                                    ? "paused"
+                                                    : !monitor.checked_at 
+                                                        ? "pending"
+                                                        : monitor.is_up 
+                                                            ? "up"
+                                                            : "down"
+                                return (<Card
+                                    key={monitor.id}
+                                    className="
+                                        transition-all
+                                        duration-200
+                                        hover:-translate-y-1
+                                        hover:border-zinc-700
+                                        hover:shadow-lg
+                                        cursor-pointer"
+                                        
+                                    onClick={() => {
+                                        navigate(`/monitor/${monitor.id}`,
+                                            { state: { monitor } }
+                                        )
+                                    }}
                                     
-                                onClick={() => {
-                                    navigate(`/monitor/${monitor.id}`,
-                                        { state: { monitor } }
-                                    )
-                                }}
-                                
-                            >
+                                >
 
-                                <CardHeader>
-                                    <div className="flex items-start justify-between gap-3">
+                                    <CardHeader>
+                                        <div className="flex items-start justify-between gap-3">
 
-                                        <div className="flex min-w-0 items-center gap-2">
+                                            <div className="flex min-w-0 items-center gap-2">
 
-                                            <div
-                                                className={`h-2 w-2 rounded-full shrink-0 ${
-                                                    monitor.is_active === false
-                                                    ? "bg-blue-500"
-                                                    : monitor.is_up === true
-                                                    ? "bg-green-500"
-                                                    : "bg-red-500"
-                                                }`}
+                                                <div className={`h-2 w-2 rounded-full shrink-0 animate-pulse ${
+                                                        status === 'paused' ? 'bg-blue-500' :
+                                                        status === 'pending' ? 'bg-zinc-400' :
+                                                        status === 'up' ? 'bg-green-500' :
+                                                        'bg-red-500'
+                                                        }`
+                                                    } 
                                                 />
 
-                                            <CardTitle className="truncate">
-                                                {monitor.title}
-                                            </CardTitle>
+                                                <CardTitle className="truncate">
+                                                    {monitor.title}
+                                                </CardTitle>
+
+                                            </div>
+
+                                            <Badge className={
+                                                status === 'paused' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                                                status === 'pending' ? 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' :
+                                                status === 'up' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                'bg-red-500/10 text-red-500 border-red-500/20'
+                                            }>
+                                                {status === 'paused' ? 'Paused' :
+                                                status === 'pending' ? 'Checking...' :
+                                                status === 'up' ? 'Up' : 'Down'}
+                                            </Badge>
 
                                         </div>
 
-                                        <Badge
-                                            className={
-                                                monitor.is_active === false
-                                                ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
-                                                : monitor.is_up === true
-                                                ? "bg-green-500/10 text-green-500 border-green-500/20"
-                                                : "bg-red-500/10 text-red-500 border-red-500/20"
-                                            }
+                                        <CardDescription className="mt-2 truncate">
+                                            {monitor.url}
+                                        </CardDescription>
+                                    </CardHeader>
+
+                                    <CardContent>
+                                        {/* Stats */}
+                                        <div className="mb-4 grid grid-cols-2 gap-3">
+
+                                            <div className="rounded-lg border p-3 cursor-default" onClick={(e) => e.stopPropagation()}>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Uptime
+                                                </p>
+
+                                                <p className="text-lg font-semibold">
+                                                    {monitor.uptime}%
+                                                </p>
+                                            </div>
+
+                                            <div className="rounded-lg border p-3 cursor-default" onClick={(e) => e.stopPropagation()}>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Latency
+                                                </p>
+
+                                                <p className="text-lg font-semibold">
+                                                    {monitor.latency
+                                                    ? `${monitor.latency} ms`
+                                                    : "--"}
+                                                </p>
+                                            </div>
+
+                                        </div>
+
+                                        {/* Last Check */}
+                                        <p className="mb-4 text-xs text-muted-foreground">
+                                            {monitor.checked_at ? (
+                                                <>
+                                                    Last checked{" "}
+                                                    {formatDistanceToNow(
+                                                        new Date(monitor.checked_at),
+                                                        { addSuffix: true }
+                                                    )}
+                                                </>
+                                            ) : "This might take a while..."}
+                                            </p>
+
+                                        {/* Actions */}
+                                        <div className="flex gap-2">
+
+                                            <Button
+                                                variant="outline"
+                                                className="cursor-pointer"
+                                                size="sm"
+                                                onClick={() =>
+                                                    navigate(`/monitor/${monitor.id}`, { state: { monitor } })
+                                                }
                                             >
-                                            {monitor.is_active === false
-                                                ? "Paused"
-                                                : monitor.is_up === true
-                                                ? "Up"
-                                                : "Down"}
-                                        </Badge>
+                                                View
+                                            </Button>
 
-                                    </div>
+                                            <Button
+                                                variant="outline"
+                                                className="cursor-pointer"
+                                                size="sm"
+                                                onClick={(e) => {e.stopPropagation(), toggleMonitor(monitor.id)}}
+                                            >
+                                                {monitor.is_active ? "Pause" : "Resume"}
+                                            </Button>
 
-                                    <CardDescription className="mt-2 truncate">
-                                        {monitor.url}
-                                    </CardDescription>
-                                </CardHeader>
-
-                                <CardContent>
-                                    {/* Stats */}
-                                    <div className="mb-4 grid grid-cols-2 gap-3">
-
-                                        <div className="rounded-lg border p-3 cursor-default" onClick={(e) => e.stopPropagation()}>
-                                            <p className="text-xs text-muted-foreground">
-                                                Uptime
-                                            </p>
-
-                                            <p className="text-lg font-semibold">
-                                                {monitor.uptime}%
-                                            </p>
+                                            <Button
+                                                variant="destructive"
+                                                className="cursor-pointer"
+                                                size="sm"
+                                                onClick={(e) => { e.stopPropagation(), deleteMonitor(monitor.id) }}
+                                            >
+                                                Delete
+                                            </Button>
                                         </div>
-
-                                        <div className="rounded-lg border p-3 cursor-default" onClick={(e) => e.stopPropagation()}>
-                                            <p className="text-xs text-muted-foreground">
-                                                Latency
-                                            </p>
-
-                                            <p className="text-lg font-semibold">
-                                                {monitor.latency
-                                                ? `${monitor.latency} ms`
-                                                : "--"}
-                                            </p>
-                                        </div>
-
-                                    </div>
-
-                                    {/* Last Check */}
-                                    <p className="mb-4 text-xs text-muted-foreground">
-                                        {monitor.checked_at ? (
-                                            <>
-                                                Last checked{" "}
-                                                {formatDistanceToNow(
-                                                    new Date(monitor.checked_at),
-                                                    { addSuffix: true }
-                                                )}
-                                            </>
-                                        ) : (
-                                            ""
-                                        )}
-                                        </p>
-
-                                    {/* Actions */}
-                                    <div className="flex gap-2">
-
-                                        <Button
-                                            variant="outline"
-                                            className="cursor-pointer"
-                                            size="sm"
-                                            onClick={() =>
-                                                navigate(`/monitor/${monitor.id}`, { state: { monitor } })
-                                            }
-                                        >
-                                            View
-                                        </Button>
-
-                                        <Button
-                                            variant="outline"
-                                            className="cursor-pointer"
-                                            size="sm"
-                                            onClick={(e) => {e.stopPropagation(), toggleMonitor(monitor.id)}}
-                                        >
-                                            {monitor.is_active ? "Pause" : "Resume"}
-                                        </Button>
-
-                                        <Button
-                                            variant="destructive"
-                                            className="cursor-pointer"
-                                            size="sm"
-                                            onClick={(e) => { e.stopPropagation(), deleteMonitor(monitor.id) }}
-                                        >
-                                            Delete
-                                        </Button>
-                                    </div>
-
-                                </CardContent>
-
-                            </Card>
-                            ))}
+                                    </CardContent>
+                                </Card>
+                            )})}
                         </div>
                         )
                     )
