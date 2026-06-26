@@ -110,60 +110,60 @@ function Dashboard() {
     }
 
     return (
-        <div className="container mx-auto min-h-screen py-8">
+        <>
+            <header className="sticky top-0 z-50 border-b border-zinc-800 bg-black/80 backdrop-blur">
+                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+                    <button
+                        onClick={() => navigate("/dashboard")}
+                        className="flex items-center gap-3 text-2xl font-bold"
+                    >
+                        {/* <img
+                            src="/logo.svg"
+                            alt="Sentinel"
+                            className="h-7 w-7"
+                        /> */}
 
-            {/* Navbar */}
-            <div className="mb-8 grid grid-cols-3 items-center">
-                <button
-                    onClick={() => navigate("/dashboard")}
-                    className="text-2xl font-bold tracking-tight transition-colors animate-in hover:text-zinc-300 cursor-pointer justify-self-start"
-                >
-                    ⬡ Sentinel
-                </button>
+                        ⬡ Sentinel
+                    </button>
 
-                <h1 className="text-2xl font-bold tracking-tight justify-self-center">
-                    {username}'s Dashboard
-                </h1>
+                    <Button
+                        variant="ghost"
+                        onClick={logout}
+                        className="cursor-pointer"
+                    >
+                        Logout
+                    </Button>
+                </div>
+            </header>
+            <div className="container mx-auto max-w-7xl px-4 py-8">
 
-                <Button
-                    onClick={() => logout()}
-                    variant="ghost"
-                    className="cursor-pointer text-zinc-300 justify-self-end"
-                >
-                    Logout
-                </Button>
-            </div>
-
-            {/* Header */}
-            <div className="mb-8 flex items-center justify-between">
+            <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">
-                    Your Monitors
+                        {username}'s Monitors
                     </h1>
 
-                    <p className="text-muted-foreground">
-                    Track uptime and monitor service health.
+                    <p className="mt-2 text-muted-foreground">
+                        Track uptime and monitor service health.
                     </p>
                 </div>
 
                 <Button
-                    className="
-                    bg-white
-                    text-black
-                    hover:bg-zinc-200
-                    hover:text-black
-                    active:scale-95
-                    transition-all
-                    duration-150
-                    cursor-pointer"
                     onClick={() => setIsPopup(true)}
+                    className="
+                        self-start
+                        bg-white
+                        text-black
+                        hover:bg-zinc-200
+                        md:self-auto
+                    "
                 >
                     + Add Monitor
                 </Button>
-                </div>
+            </div>
 
                 {/* Stats Cards */}
-                <div className="mb-8 grid gap-4 md:grid-cols-3">
+                <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
 
                 <Card>
                     <CardContent className="pt-3">
@@ -205,7 +205,7 @@ function Dashboard() {
 
             {loading 
                 ? (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                         {[1,2,3].map(i => (
                             <Card key={i} className="animate-pulse">
                                 <CardContent className="h-32" />
@@ -252,21 +252,19 @@ function Dashboard() {
                                 return (<Card
                                     key={monitor.id}
                                     className="
+                                        cursor-pointer
                                         transition-all
                                         duration-200
                                         hover:-translate-y-1
-                                        hover:border-zinc-700
-                                        hover:shadow-lg
-                                        cursor-pointer"
+                                        hover:shadow-xl
+                                        "
                                         
                                     onClick={() => {
                                         navigate(`/monitor/${monitor.id}`,
                                             { state: { monitor } }
                                         )
                                     }}
-                                    
                                 >
-
                                     <CardHeader>
                                         <div className="flex items-start justify-between gap-3">
 
@@ -310,21 +308,21 @@ function Dashboard() {
                                         <div className="mb-4 grid grid-cols-2 gap-3">
 
                                             <div className="rounded-lg border p-3 cursor-default" onClick={(e) => e.stopPropagation()}>
-                                                <p className="text-xs text-muted-foreground">
+                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
                                                     Uptime
                                                 </p>
 
-                                                <p className="text-lg font-semibold">
+                                                <p className="mt-1 text-xl font-bold">
                                                     {monitor.uptime}%
                                                 </p>
                                             </div>
 
                                             <div className="rounded-lg border p-3 cursor-default" onClick={(e) => e.stopPropagation()}>
-                                                <p className="text-xs text-muted-foreground">
+                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
                                                     Latency
                                                 </p>
 
-                                                <p className="text-lg font-semibold">
+                                                <p className="mt-1 text-xl font-bold">
                                                     {monitor.latency
                                                     ? `${monitor.latency} ms`
                                                     : "--"}
@@ -334,7 +332,7 @@ function Dashboard() {
                                         </div>
 
                                         {/* Last Check */}
-                                        <p className="mb-4 text-xs text-muted-foreground">
+                                        <p className="mb-5 text-xs text-zinc-400">
                                             {monitor.checked_at ? (
                                                 <>
                                                     Last checked{" "}
@@ -347,7 +345,7 @@ function Dashboard() {
                                             </p>
 
                                         {/* Actions */}
-                                        <div className="flex gap-2">
+                                        <div className="flex flex-wrap gap-2">
 
                                             <Button
                                                 variant="outline"
@@ -390,8 +388,7 @@ function Dashboard() {
                 open={isPopup}
                 onOpenChange={setIsPopup}
             >
-                <DialogContent className="sm:max-w-125">
-
+                <DialogContent className="w-[95vw] max-w-lg rounded-xl">
                     <DialogHeader>
                         <DialogTitle className="text-xl">
                             Create Monitor
@@ -455,6 +452,7 @@ function Dashboard() {
             </Dialog>
 
         </div>
+        </>
     );
 
 
