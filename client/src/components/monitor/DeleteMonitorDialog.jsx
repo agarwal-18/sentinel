@@ -64,19 +64,30 @@ export default function DeleteMonitorDialog({
                     </AlertDialogCancel>
 
                     <AlertDialogAction
-                        onClick={onConfirm}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            onConfirm();
+                        }}
                         disabled={loading}
-                        className="bg-red-600 hover:bg-red-700 focus:ring-red-500"
+                        className="
+                            inline-flex items-center justify-center gap-2
+                            border border-red-500/20
+                            bg-red-500/10
+                            text-red-400
+                            hover:bg-red-500/20
+                            hover:text-red-300
+                            transition-colors
+                        "
                     >
                         {loading ? (
                             <>
-                                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                                Deleting...
+                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                                <span>Deleting...</span>
                             </>
                         ) : (
                             <>
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete Monitor
+                                <Trash2 className="h-4 w-4" />
+                                <span>Delete Monitor</span>
                             </>
                         )}
                     </AlertDialogAction>

@@ -25,7 +25,7 @@ async function analyseIncident(monitorTitle, pings) {
                     "summary": "string",
                     "pattern": "string",
                     "probable_cause": "string",
-                    "severity": "low | medium | high",
+                    "severity": "low | medium | high | critical",
                     "confidence": "low | medium | high",
                     "suggestion": "string"
                 }

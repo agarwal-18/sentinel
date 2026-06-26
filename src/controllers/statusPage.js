@@ -37,13 +37,13 @@ async function getUserMonitors(req, res) {
         for (const monitor of latestPing.rows) {
             const monitorId = monitor.id;
             const monitorStats = await calculateMonitorStats(monitorId);
-            const monitorRecord = {...monitor, ...monitorStats};
+            const monitorRecord = {...monitor, ...monitorStats };
             userMonitorRecords.push(monitorRecord);
         }
         return res.status(200).json({ monitors: userMonitorRecords });
     }
     catch (err) {
-        return res.status(500).json({error: err.message});
+        return res.status(500).json({ error: err.message });
     }
 }
 

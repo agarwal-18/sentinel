@@ -24,6 +24,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import DeleteMonitorDialog from "@/components/monitor/DeleteMonitorDialog";
+import { Globe } from "lucide-react";
 
 
 
@@ -35,7 +37,9 @@ function Dashboard() {
         url: ''
     });
     const [loading, setLoading] = useState(true);
-    
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [selectedMonitor, setSelectedMonitor] = useState(null);
     const navigate = useNavigate();
 
     const token = localStorage.getItem('token');
@@ -77,15 +81,23 @@ function Dashboard() {
         }
     }
 
-    const deleteMonitor = async (id) => {
+    const deleteMonitor = async () => {
+        if (!selectedMonitor) return;
+
         try {
-            await deleteMonitorService(id)
-            await fetchMonitors()
+            setDeleteLoading(true);
+
+            await deleteMonitorService(selectedMonitor.id);
+            await fetchMonitors();
+
+            setDeleteDialogOpen(false);
+            setSelectedMonitor(null);
+        } catch (err) {
+            console.log(err.message);
+        } finally {
+            setDeleteLoading(false);
         }
-        catch (err) {
-            console.log(err.message)
-        }
-    }
+    };
 
     const toggleMonitor = async (id) => {
         try {
@@ -115,15 +127,9 @@ function Dashboard() {
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
                     <button
                         onClick={() => navigate("/dashboard")}
-                        className="flex items-center gap-3 text-2xl font-bold"
+                        className="flex items-center gap-3 text-3xl tracking-tight font-bold cursor-pointer hover:text-gray-300 transition-colors"
                     >
-                        {/* <img
-                            src="/logo.svg"
-                            alt="Sentinel"
-                            className="h-7 w-7"
-                        /> */}
-
-                        ⬡ Sentinel
+                        ⬡  Sentinel
                     </button>
 
                     <Button
@@ -135,15 +141,15 @@ function Dashboard() {
                     </Button>
                 </div>
             </header>
-            <div className="container mx-auto max-w-7xl px-4 py-8">
+            <div className="container mx-auto max-w-7xl px-4 py-8 animate-in fade-in duration-300">
 
-            <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">
+                    <h1 className="text-4xl font-bold tracking-tight">
                         {username}'s Monitors
                     </h1>
 
-                    <p className="mt-2 text-muted-foreground">
+                    <p className="mt-3 text-base text-zinc-400">
                         Track uptime and monitor service health.
                     </p>
                 </div>
@@ -165,37 +171,37 @@ function Dashboard() {
                 {/* Stats Cards */}
                 <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
 
-                <Card>
-                    <CardContent className="pt-3">
-                    <p className="text-sm text-muted-foreground">
+                <Card className="border-zinc-800 bg-zinc-950/70 backdrop-blur-sm">
+                    <CardContent className="space-y-2 pt-6">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
                         Total Monitors
                     </p>
 
-                    <h2 className="mt-2 text-3xl font-bold">
+                    <h2 className="text-4xl font-bold">
                         {totalMonitors}
                     </h2>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardContent className="pt-3">
-                    <p className="text-sm text-muted-foreground">
+                <Card className="border-zinc-800 bg-zinc-950/70 backdrop-blur-sm">
+                    <CardContent className="space-y-2 pt-6">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
                         Active
                     </p>
 
-                    <h2 className="mt-2 text-3xl font-bold text-green-500">
+                    <h2 className="text-4xl font-bold text-green-500">
                         {activeMonitors}
                     </h2>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardContent className="pt-3">
-                    <p className="text-sm text-muted-foreground">
+                <Card className="border-zinc-800 bg-zinc-950/70 backdrop-blur-sm">
+                    <CardContent className="space-y-2 pt-6">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
                         Paused
                     </p>
 
-                    <h2 className="mt-2 text-3xl font-bold text-blue-500">
+                    <h2 className="text-4xl font-bold text-blue-500">
                         {pausedMonitors}
                     </h2>
                     </CardContent>
@@ -207,7 +213,10 @@ function Dashboard() {
                 ? (
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                         {[1,2,3].map(i => (
-                            <Card key={i} className="animate-pulse">
+                            <Card
+                                key={i}
+                                className="border-zinc-800 bg-zinc-950/70 animate-pulse"
+                            >
                                 <CardContent className="h-32" />
                             </Card>
                         ))}
@@ -216,8 +225,8 @@ function Dashboard() {
                 : monitors.length === 0 
                     ? (
                         (
-                            <Card>
-                                <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                            <Card className="border-zinc-800 bg-zinc-950/70">
+                                <CardContent className="flex flex-col items-center justify-center py-20 text-center">
                                     <div className="mb-4 text-center">
                                         <h2 className="mb-2 text-lg font-semibold">
                                             No monitors yet
@@ -253,9 +262,13 @@ function Dashboard() {
                                     key={monitor.id}
                                     className="
                                         cursor-pointer
+                                        border-zinc-800
+                                        bg-zinc-950/70
+                                        backdrop-blur-sm
                                         transition-all
                                         duration-200
                                         hover:-translate-y-1
+                                        hover:border-zinc-700
                                         hover:shadow-xl
                                         "
                                         
@@ -265,7 +278,7 @@ function Dashboard() {
                                         )
                                     }}
                                 >
-                                    <CardHeader>
+                                    <CardHeader className="space-y-4">
                                         <div className="flex items-start justify-between gap-3">
 
                                             <div className="flex min-w-0 items-center gap-2">
@@ -279,18 +292,30 @@ function Dashboard() {
                                                     } 
                                                 />
 
-                                                <CardTitle className="truncate">
+                                                <CardTitle className="truncate text-xl">
                                                     {monitor.title}
                                                 </CardTitle>
 
                                             </div>
 
-                                            <Badge className={
-                                                status === 'paused' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                                                status === 'pending' ? 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' :
-                                                status === 'up' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                                'bg-red-500/10 text-red-500 border-red-500/20'
-                                            }>
+                                            <Badge
+                                                className={`
+                                                    rounded-full
+                                                    border
+                                                    px-3
+                                                    py-1
+                                                    font-medium
+                                                    ${
+                                                        status === "paused"
+                                                            ? "border-blue-500/20 bg-blue-500/10 text-blue-500"
+                                                            : status === "pending"
+                                                            ? "border-zinc-500/20 bg-zinc-500/10 text-zinc-400"
+                                                            : status === "up"
+                                                            ? "border-green-500/20 bg-green-500/10 text-green-500"
+                                                            : "border-red-500/20 bg-red-500/10 text-red-500"
+                                                    }
+                                                `}
+                                            >
                                                 {status === 'paused' ? 'Paused' :
                                                 status === 'pending' ? 'Checking...' :
                                                 status === 'up' ? 'Up' : 'Down'}
@@ -298,31 +323,52 @@ function Dashboard() {
 
                                         </div>
 
-                                        <CardDescription className="mt-2 truncate">
-                                            {monitor.url}
-                                        </CardDescription>
+                                        <a
+                                            href={monitor.url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-white"
+                                        >
+                                            <Globe className="h-4 w-4" />
+
+                                            <span className="break-all">
+                                                {monitor.url}
+                                            </span>
+                                        </a>
                                     </CardHeader>
 
-                                    <CardContent>
+                                    <CardContent className="pt-0">
                                         {/* Stats */}
                                         <div className="mb-4 grid grid-cols-2 gap-3">
 
-                                            <div className="rounded-lg border p-3 cursor-default" onClick={(e) => e.stopPropagation()}>
+                                            <div className="cursor-default
+                                                rounded-xl
+                                                border
+                                                border-zinc-800
+                                                bg-zinc-900/60
+                                                p-4" 
+                                                onClick={(e) => e.stopPropagation()}>
                                                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                                                     Uptime
                                                 </p>
 
-                                                <p className="mt-1 text-xl font-bold">
+                                                <p className="mt-2 text-2xl font-bold">
                                                     {monitor.uptime}%
                                                 </p>
                                             </div>
 
-                                            <div className="rounded-lg border p-3 cursor-default" onClick={(e) => e.stopPropagation()}>
+                                            <div className="cursor-default
+                                                rounded-xl
+                                                border
+                                                border-zinc-800
+                                                bg-zinc-900/60
+                                                p-4" 
+                                                onClick={(e) => e.stopPropagation()}>
                                                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                                                     Latency
                                                 </p>
 
-                                                <p className="mt-1 text-xl font-bold">
+                                                <p className="mt-2 text-2xl font-bold">
                                                     {monitor.latency
                                                     ? `${monitor.latency} ms`
                                                     : "--"}
@@ -332,7 +378,7 @@ function Dashboard() {
                                         </div>
 
                                         {/* Last Check */}
-                                        <p className="mb-5 text-xs text-zinc-400">
+                                        <p className="mb-6 border-t border-zinc-800 pt-4  text-zinc-500">
                                             {monitor.checked_at ? (
                                                 <>
                                                     Last checked{" "}
@@ -349,7 +395,7 @@ function Dashboard() {
 
                                             <Button
                                                 variant="outline"
-                                                className="cursor-pointer"
+                                                className="text-sm cursor-pointer"
                                                 size="sm"
                                                 onClick={() =>
                                                     navigate(`/monitor/${monitor.id}`, { state: { monitor } })
@@ -360,7 +406,7 @@ function Dashboard() {
 
                                             <Button
                                                 variant="outline"
-                                                className="cursor-pointer"
+                                                className="text-sm cursor-pointer border-zinc-700"
                                                 size="sm"
                                                 onClick={(e) => {e.stopPropagation(), toggleMonitor(monitor.id)}}
                                             >
@@ -369,9 +415,13 @@ function Dashboard() {
 
                                             <Button
                                                 variant="destructive"
-                                                className="cursor-pointer"
+                                                className="text-sm cursor-pointer border-b-2 border-red-900"
                                                 size="sm"
-                                                onClick={(e) => { e.stopPropagation(), deleteMonitor(monitor.id) }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedMonitor(monitor);
+                                                    setDeleteDialogOpen(true);
+                                                }}
                                             >
                                                 Delete
                                             </Button>
@@ -450,6 +500,19 @@ function Dashboard() {
 
                 </DialogContent>
             </Dialog>
+            <DeleteMonitorDialog
+                open={deleteDialogOpen}
+                onOpenChange={(open) => {
+                    setDeleteDialogOpen(open);
+
+                    if (!open) {
+                        setSelectedMonitor(null);
+                    }
+                }}
+                monitorName={selectedMonitor?.title}
+                loading={deleteLoading}
+                onConfirm={deleteMonitor}
+            />
 
         </div>
         </>

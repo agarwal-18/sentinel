@@ -79,6 +79,11 @@ function MonitorDetails() {
         return () => clearInterval(interval);
     }, []);
 
+    const logout = () => {
+        localStorage.removeItem("token");
+        navigate("/");
+    };
+
     const stats = useMemo(() => {
         const totalPingsCount = pings.length;
         const failedPings = pings.filter((p) => !p.is_up);
@@ -187,6 +192,7 @@ function MonitorDetails() {
                 <p className="mb-4 text-muted-foreground">
                     This monitor doesn't exist or you don't have access to it.
                 </p>
+
                 <Button onClick={() => navigate("/dashboard")}>
                     Back to Dashboard
                 </Button>
@@ -203,48 +209,69 @@ function MonitorDetails() {
     }
 
     return (
-        <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8">
-            <MonitorHeader
-                monitor={monitor}
-                hasAnalysis={!!aiResult}
-                aiLoading={aiLoading}
-                onBack={() => navigate("/dashboard")}
-                onAnalyse={handleAnalyse}
-                onToggle={handleToggle}
-                onDelete={() => setDeleteDialogOpen(true)}
-            />
+        <>
+            <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
+                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+                    <button
+                        onClick={() => navigate("/dashboard")}
+                        className="flex cursor-pointer items-center gap-3 text-3xl font-bold tracking-tight"
+                    >
+                        ⬡ Sentinel
+                    </button>
 
-            <StatsCards
-                uptime={monitor.uptime}
-                latency={monitor.latency}
-                checks={pings.length}
-                failures={stats.failedPingsCount}
-                lastChecked={monitor.checked_at}
-            />
+                    <Button
+                        variant="ghost"
+                        onClick={logout}
+                        className="cursor-pointer"
+                    >
+                        Logout
+                    </Button>
+                </div>
+            </header>
 
-            <LatencyChart chartData={stats.chartData} />
-
-            <div ref={aiSectionRef}>
-                <AIInsights
-                    loading={aiLoading}
-                    result={aiResult}
-                    generatedAt={analysisTime}
-                    failedChecks={stats.last24hFailedCount}
-                    failureRate={stats.last24hFailureRate}
+            <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8">
+                <MonitorHeader
+                    monitor={monitor}
+                    hasAnalysis={!!aiResult}
+                    aiLoading={aiLoading}
+                    onBack={() => navigate("/dashboard")}
                     onAnalyse={handleAnalyse}
+                    onToggle={handleToggle}
+                    onDelete={() => setDeleteDialogOpen(true)}
+                />
+
+                <StatsCards
+                    uptime={monitor.uptime}
+                    latency={monitor.latency}
+                    checks={pings.length}
+                    failures={stats.failedPingsCount}
+                    lastChecked={monitor.checked_at}
+                />
+
+                <LatencyChart chartData={stats.chartData} />
+
+                <div ref={aiSectionRef}>
+                    <AIInsights
+                        loading={aiLoading}
+                        result={aiResult}
+                        generatedAt={analysisTime}
+                        failedChecks={stats.last24hFailedCount}
+                        failureRate={stats.last24hFailureRate}
+                        onAnalyse={handleAnalyse}
+                    />
+                </div>
+
+                <RecentChecks pings={pings} />
+
+                <DeleteMonitorDialog
+                    open={deleteDialogOpen}
+                    onOpenChange={setDeleteDialogOpen}
+                    monitorName={monitor.title}
+                    loading={deleteLoading}
+                    onConfirm={handleDelete}
                 />
             </div>
-
-            <RecentChecks pings={pings} />
-
-            <DeleteMonitorDialog
-                open={deleteDialogOpen}
-                onOpenChange={setDeleteDialogOpen}
-                monitorName={monitor.title}
-                loading={deleteLoading}
-                onConfirm={handleDelete}
-            />
-        </div>
+        </>
     );
 }
 
