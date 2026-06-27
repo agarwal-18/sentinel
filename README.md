@@ -117,14 +117,14 @@ npm run dev
 
 ## Screenshots
 
-**Dashboard**
+### Dashboard
 ![Dashboard](./screenshots/dashboard.png)
 
-**Monitor detail**
+### Monitor Details
 ![Monitor detail](./screenshots/monitor-detail.png)
 
-**AI incident analysis**
+### AI Incident Analysis
 ![AI analysis](./screenshots/ai-analysis.png)
 
-**Public status page**
+### Public Status Page
 ![Status page](./screenshots/status-page.png)
